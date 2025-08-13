@@ -1,346 +1,103 @@
-name: Cypress E2E Tests
+name: Cypress CI (Robust)
 
 on:
-  # Trigger on push to main branch
   push:
-    branches: [ main, master ]
-  
-  # Trigger on pull requests to main branch
   pull_request:
-    branches: [ main, master ]
-  
-  # Allow manual trigger
   workflow_dispatch:
-    inputs:
-      browser:
-        description: 'Browser to run tests on'
-        required: false
-        default: 'chrome'
-        type: choice
-        options:
-          - chrome
-          - firefox
-          - edge
-      environment:
-        description: 'Environment to run tests against'
-        required: false
-        default: 'staging'
-        type: choice
-        options:
-          - staging
-          - production
-      tags:
-        description: 'Test tags to run (e.g., @smoke, @regression)'
-        required: false
-        default: ''
-        type: string
-
-  # Schedule daily runs at 2 AM UTC
-  schedule:
-    - cron: '0 2 * * *'
 
 jobs:
-  # Install dependencies and cache them
-  install:
+  cypress:
+    name: e2e-${{ matrix.browser }}-shard-${{ matrix.shard }}
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Cache Cypress binary
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/Cypress
-          key: cypress-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            cypress-${{ runner.os }}-
-
-      - name: Install Cypress
-        run: npx cypress install
-
-  # Lint and validate tests
-  lint:
-    runs-on: ubuntu-latest
-    needs: install
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run ESLint (if configured)
-        run: |
-          if [ -f ".eslintrc.js" ] || [ -f ".eslintrc.json" ]; then
-            npx eslint cypress/
-          else
-            echo "ESLint not configured, skipping..."
-          fi
-
-      - name: Validate test files
-        run: |
-          find cypress/e2e -name "*.cy.js" | wc -l
-          echo "Found test files in cypress/e2e directory"
-
-  # Run Cypress tests in Chrome
-  cypress-chrome:
-    runs-on: ubuntu-latest
-    needs: install
     strategy:
       fail-fast: false
       matrix:
-        # Run tests in parallel
-        containers: [1, 2, 3]
+        include:
+          - browser: chrome
+            shard: 1
+          - browser: chrome
+            shard: 2
+          - browser: chrome
+            shard: 3
+          - browser: firefox
+            shard: 1
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: 20
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
 
-      - name: Restore Cypress binary cache
-        uses: actions/cache@v3
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
         with:
-          path: ~/.cache/Cypress
-          key: cypress-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-
-      - name: Install Cypress
-        run: npx cypress install
-
-      - name: Wait for application to be ready
-        run: |
-          echo "Waiting for https://automationexercise.com to be available..."
-          npx wait-on https://automationexercise.com --timeout 60000
-
-      - name: Run Cypress tests (framework-demo & api-tests only)
-        run: npx cypress run --spec "cypress/e2e/framework-demo.cy.js,cypress/e2e/api-tests.cy.js" --browser chrome --headed
+          browser: ${{ matrix.browser }}
+          headed: false
+          # run only the two demo specs
+          spec: cypress/e2e/framework-demo.cy.js,cypress/e2e/api-tests.cy.js
         env:
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CYPRESS_environment: ${{ github.event.inputs.environment || 'staging' }}
+          CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
 
-      - name: Upload screenshots on failure
+      - name: Upload reports
+        if: always()
         uses: actions/upload-artifact@v4
-        if: failure()
         with:
-          name: cypress-screenshots-chrome-${{ matrix.containers }}
+          name: cypress-reports-${{ matrix.browser }}-${{ matrix.shard }}
+          path: cypress/reports
+          if-no-files-found: warn
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots-${{ matrix.browser }}-${{ matrix.shard }}
           path: cypress/screenshots
-          retention-days: 7
+          if-no-files-found: warn
 
       - name: Upload videos
-        uses: actions/upload-artifact@v4
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: cypress-videos-chrome-${{ matrix.containers }}
+          name: cypress-videos-${{ matrix.browser }}-${{ matrix.shard }}
           path: cypress/videos
-          retention-days: 7
+          if-no-files-found: warn
 
-      - name: Upload test reports
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: cypress-reports-chrome-${{ matrix.containers }}
-          path: cypress/reports
-          retention-days: 14
-
-  # Run Cypress tests in Firefox
-  cypress-firefox:
-    runs-on: ubuntu-latest
-    needs: install
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Firefox
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y firefox
-
-      - name: Install Cypress
-        run: npx cypress install
-
-      - name: Run Cypress tests in Firefox (framework-demo & api-tests only)
-        run: npx cypress run --spec "cypress/e2e/framework-demo.cy.js,cypress/e2e/api-tests.cy.js" --browser firefox --headed
-        env:
-          CYPRESS_environment: ${{ github.event.inputs.environment || 'staging' }}
-
-      - name: Upload artifacts on failure
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: cypress-artifacts-firefox
-          path: |
-            cypress/screenshots
-            cypress/videos
-          retention-days: 7
-
-  # Run API tests separately
-  api-tests:
-    runs-on: ubuntu-latest
-    needs: install
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Cypress
-        run: npx cypress install
-
-      - name: Run API tests (api-tests only)
-        run: npx cypress run --spec "cypress/e2e/api-tests.cy.js" --browser chrome --headless
-        env:
-          CYPRESS_environment: ${{ github.event.inputs.environment || 'staging' }}
-
-      - name: Upload API test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: api-test-results
-          path: cypress/reports
-          retention-days: 14
-
-  # Run smoke tests for quick feedback
-
-
-  # Generate and publish test reports
   report:
+    name: merge-and-publish-report
     runs-on: ubuntu-latest
-    needs: [cypress-chrome, cypress-firefox, api-tests]
-    if: always()
+    needs: cypress
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: 20
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
 
-      - name: Merge test reports
+      - name: Merge mochawesome JSON
         run: |
-          npx mochawesome-merge artifacts/*/mochawesome.json > merged-report.json || echo "No reports to merge"
-
+          ls -R artifacts || true
+          npx mochawesome-merge "artifacts/**/mochawesome*.json" > merged-report.json || echo "No reports to merge"
+      
       - name: Generate HTML report
         run: |
           if [ -f "merged-report.json" ]; then
             npx marge merged-report.json --reportDir final-report --inline
           else
-            echo "No merged report found"
+            echo "No merged-report.json found, skipping HTML generation"
           fi
 
-      - name: Publish test results
-        uses: actions/upload-artifact@v4
+      - name: Upload final report
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: final-test-report
+          name: final-report
           path: final-report
-          retention-days: 30
-
-      - name: Comment PR with test results
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            let testResults = 'Test execution completed!';
-            
-            if (fs.existsSync('final-report/mochawesome.html')) {
-              testResults += '\n\n📊 Detailed test report available in artifacts.';
-            }
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: testResults
-            });
-
-  # Notification job
-  # notify:
-  #   runs-on: ubuntu-latest
-  #   needs: [cypress-chrome, cypress-firefox, api-tests]
-  #   if: always()
-  #   steps:
-  #     - name: Send Slack notification (if configured)
-  #       if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
-  #       uses: 8398a7/action-slack@v3
-  #       with:
-  #         status: ${{ job.status }}
-  #         channel: '#qa-automation'
-  #         webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-  #         fields: repo,message,commit,author,action,eventName,ref,workflow
-  #
-  #     - name: Send email notification (if configured)
-  #       if: failure() && ${{ secrets.EMAIL_ADDRESS != '' }}
-  #       uses: dawidd6/action-send-mail@v3
-  #       with:
-  #         server_address: smtp.gmail.com
-  #         server_port: 465
-  #         username: ${{ secrets.EMAIL_USERNAME }}
-  #         password: ${{ secrets.EMAIL_PASSWORD }}
-  #         subject: 'Cypress Tests Failed - ${{ github.repository }}'
-  #         to: ${{ secrets.EMAIL_ADDRESS }}
-  #         from: 'GitHub Actions'
-  #         body: |
-  #           The Cypress test suite has failed on ${{ github.repository }}.
-  #           
-  #           Branch: ${{ github.ref }}
-  #           Commit: ${{ github.sha }}
-  #           Author: ${{ github.actor }}
-  #           
-  #           Check the GitHub Actions logs for more details.
-
-# Environment variables for all jobs
-env:
-  # Set Cypress environment variables
-  CYPRESS_baseUrl: https://automationexercise.com
-  CYPRESS_viewportWidth: 1280
-  CYPRESS_viewportHeight: 720
-  CYPRESS_defaultCommandTimeout: 10000
-  
-  # Disable Cypress update notifications in CI
-  CI: true
-  CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
+          if-no-files-found: warn
