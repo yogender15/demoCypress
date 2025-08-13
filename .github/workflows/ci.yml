@@ -36,7 +36,6 @@ jobs:
         with:
           browser: ${{ matrix.browser }}
           headed: false
-          # run only the two demo specs
           spec: cypress/e2e/framework-demo.cy.js,cypress/e2e/api-tests.cy.js
         env:
           CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
@@ -84,12 +83,12 @@ jobs:
       - name: Merge mochawesome JSON
         run: |
           ls -R artifacts || true
-          npx mochawesome-merge "artifacts/**/mochawesome*.json" > merged-report.json || echo "No reports to merge"
+          npx --yes mochawesome-merge@^4 "artifacts/**/mochawesome*.json" > merged-report.json || echo "No reports to merge"
       
       - name: Generate HTML report
         run: |
           if [ -f "merged-report.json" ]; then
-            npx marge merged-report.json --reportDir final-report --inline
+            npx --yes mochawesome-report-generator@^6 merged-report.json --reportDir final-report --inline
           else
             echo "No merged-report.json found, skipping HTML generation"
           fi
