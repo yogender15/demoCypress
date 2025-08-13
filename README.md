@@ -1,3 +1,5 @@
+[![CI](https://github.com/yogender15/demoCypress/actions/workflows/cy.yml/badge.svg?branch=main)](https://github.com/yogender15/demoCypress/actions/workflows/cy.yml)
+
 # Cypress E2E Testing Framework
 
 A comprehensive Cypress test automation framework for e-commerce applications, demonstrating best practices in QA automation testing.
