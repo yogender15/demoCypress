@@ -1,4 +1,4 @@
-[![CI](https://github.com/yogender15/demoCypress/actions/workflows/cy.yml/badge.svg?branch=main)](https://github.com/yogender15/demoCypress/actions/workflows/cy.yml)
+[![CI](https://github.com/yogender15/demoCypress/actions/workflows/cy.yml/badge.svg?branch=main)](https://github.com/yogender15/demoCypress/actions/workflows/ci.yml)
 
 # Cypress E2E Testing Framework
 
