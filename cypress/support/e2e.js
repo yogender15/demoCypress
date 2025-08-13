@@ -10,7 +10,7 @@ import 'cypress-mochawesome-reporter/register'
 // require('./commands')
 
 // You can also import supporting libraries
-import 'cypress-grep'
+import '@cypress/grep'
 
 // Global before hook for test setup
 beforeEach(() => {
