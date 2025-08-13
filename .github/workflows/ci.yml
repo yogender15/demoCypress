@@ -1,4 +1,4 @@
-name: Cypress CI (Robust)
+name: Cypress CI (Robust, Safe Merge)
 
 on:
   push:
@@ -80,18 +80,36 @@ jobs:
         with:
           path: artifacts
 
-      - name: Merge mochawesome JSON
+      - name: List artifacts
         run: |
+          echo "::group::Artifacts tree"
           ls -R artifacts || true
-          npx --yes mochawesome-merge@^4 "artifacts/**/mochawesome*.json" > merged-report.json || echo "No reports to merge"
-      
-      - name: Generate HTML report
+          echo "::endgroup::"
+
+      - name: Merge mochawesome JSON (safe)
+        shell: bash
         run: |
-          if [ -f "merged-report.json" ]; then
-            npx --yes mochawesome-report-generator@^6 merged-report.json --reportDir final-report --inline
-          else
-            echo "No merged-report.json found, skipping HTML generation"
+          set -eo pipefail
+          # Gather inputs
+          mapfile -t FILES < <(ls -1 artifacts/**/mochawesome*.json 2>/dev/null || true)
+          echo "Found ${#FILES[@]} mochawesome JSON files"
+          if [ "${#FILES[@]}" -eq 0 ]; then
+            echo "No mochawesome JSON files found. Skipping merge."
+            exit 0
           fi
+          # Install merge tool transiently and merge
+          npx --yes mochawesome-merge@^4 "${FILES[@]}" > merged-report.json
+          echo "Merged report size (bytes): $(wc -c < merged-report.json)"
+          # Basic sanity check
+          if [ ! -s merged-report.json ] || ! grep -q '"stats"' merged-report.json; then
+            echo "Merged file is empty or not valid mochawesome format. Aborting HTML generation."
+            exit 0
+          fi
+
+      - name: Generate HTML report (only if merged-report.json exists and is valid)
+        if: hashFiles('merged-report.json') != ''
+        run: |
+          npx --yes mochawesome-report-generator@^6 merged-report.json --reportDir final-report --inline || echo "Report generation failed, but continuing."
 
       - name: Upload final report
         if: always()
