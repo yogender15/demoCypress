@@ -1,0 +1,117 @@
+{
+  "featuredProducts": [
+    {
+      "id": 1,
+      "name": "Blue Top",
+      "category": "Women > Tops",
+      "price": "Rs. 500",
+      "brand": "Polo",
+      "availability": "In Stock",
+      "condition": "New",
+      "description": "Beautiful blue top for women"
+    },
+    {
+      "id": 2,
+      "name": "Men Tshirt",
+      "category": "Men > Tshirts",
+      "price": "Rs. 400",
+      "brand": "H&M",
+      "availability": "In Stock",
+      "condition": "New",
+      "description": "Comfortable cotton t-shirt for men"
+    },
+    {
+      "id": 3,
+      "name": "Sleeveless Dress",
+      "category": "Women > Dress",
+      "price": "Rs. 1000",
+      "brand": "Madame",
+      "availability": "In Stock",
+      "condition": "New",
+      "description": "Elegant sleeveless dress"
+    }
+  ],
+  "searchProducts": [
+    {
+      "searchTerm": "top",
+      "expectedResults": ["Blue Top", "Fancy Green Top"]
+    },
+    {
+      "searchTerm": "dress",
+      "expectedResults": ["Sleeveless Dress", "Beautiful Peacock Blue Cotton Linen Saree"]
+    },
+    {
+      "searchTerm": "men",
+      "expectedResults": ["Men Tshirt"]
+    },
+    {
+      "searchTerm": "nonexistent",
+      "expectedResults": []
+    }
+  ],
+  "categories": [
+    {
+      "name": "Women",
+      "subcategories": ["Dress", "Tops", "Saree"]
+    },
+    {
+      "name": "Men",
+      "subcategories": ["Tshirts", "Jeans"]
+    },
+    {
+      "name": "Kids",
+      "subcategories": ["Dress", "Tops & Shirts"]
+    }
+  ],
+  "brands": [
+    "Polo",
+    "H&M",
+    "Madame",
+    "Mast & Harbour",
+    "Babyhug",
+    "Allen Solly Junior",
+    "Kookie Kids",
+    "Biba"
+  ],
+  "cartTestData": [
+    {
+      "productId": 1,
+      "quantity": 2,
+      "expectedPrice": "Rs. 500",
+      "expectedTotal": "Rs. 1000"
+    },
+    {
+      "productId": 2,
+      "quantity": 1,
+      "expectedPrice": "Rs. 400",
+      "expectedTotal": "Rs. 400"
+    }
+  ],
+  "productDetails": {
+    "product1": {
+      "name": "Blue Top",
+      "category": "Category: Women > Tops",
+      "price": "Rs. 500",
+      "availability": "Availability: In Stock",
+      "condition": "Condition: New",
+      "brand": "Brand: Polo"
+    }
+  },
+  "priceRanges": [
+    {
+      "min": 0,
+      "max": 500,
+      "description": "Budget range"
+    },
+    {
+      "min": 500,
+      "max": 1000,
+      "description": "Mid range"
+    },
+    {
+      "min": 1000,
+      "max": 5000,
+      "description": "Premium range"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "name": "democypress",
+  "version": "1.0.0",
+  "description": "Comprehensive Cypress E2E Testing Framework for E-commerce Application",
+  "main": "index.js",
+  "scripts": {
+    "test": "cypress run",
+    "test:headed": "cypress run --headed",
+    "test:chrome": "cypress run --browser chrome",
+    "test:firefox": "cypress run --browser firefox",
+    "test:edge": "cypress run --browser edge",
+    "test:mobile": "cypress run --config viewportWidth=375,viewportHeight=667",
+    "test:api": "cypress run --spec 'cypress/e2e/api-tests.cy.js'",
+    "test:smoke": "cypress run --spec 'cypress/e2e/login.cy.js'",
+    "test:regression": "cypress run --spec 'cypress/e2e/*.cy.js'",
+    "test:parallel": "cypress run --record --parallel",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "cy:run:record": "cypress run --record",
+    "report:merge": "mochawesome-merge cypress/reports/*.json > cypress/reports/merged-report.json",
+    "report:generate": "marge cypress/reports/merged-report.json --reportDir cypress/reports --inline",
+    "report:open": "npm run report:merge && npm run report:generate && start cypress/reports/mochawesome.html",
+    "clean:reports": "rm -rf cypress/reports cypress/screenshots cypress/videos",
+    "test:dashboard": "cypress run --record --key $CYPRESS_RECORD_KEY",
+    "lint": "echo 'Linting not configured yet'",
+    "pretest": "npm run clean:reports"
+  },
+  "keywords": [
+    "cypress",
+    "testing",
+    "e2e",
+    "automation",
+    "javascript",
+    "qa",
+    "page-object-model",
+    "api-testing",
+    "ci-cd"
+  ],
+  "author": "QA Automation Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/demoCypress.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/demoCypress/issues"
+  },
+  "homepage": "https://github.com/your-username/demoCypress#readme",
+  "devDependencies": {
+    "@cypress/grep": "^4.1.0",
+    "cypress": "^14.5.3",
+    "cypress-grep": "^3.0.4",
+    "cypress-mochawesome-reporter": "^4.0.0",
+    "mochawesome": "^7.1.3",
+    "mochawesome-merge": "^5.0.0",
+    "mochawesome-report-generator": "^6.2.0"
+  }
+}

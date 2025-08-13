@@ -1,0 +1,160 @@
+{
+  "endpoints": {
+    "products": {
+      "url": "/api/productsList",
+      "method": "GET",
+      "expectedStatusCode": 200,
+      "expectedResponseCode": 200
+    },
+    "brands": {
+      "url": "/api/brandsList",
+      "method": "GET",
+      "expectedStatusCode": 200,
+      "expectedResponseCode": 200
+    },
+    "searchProduct": {
+      "url": "/api/searchProduct",
+      "method": "POST",
+      "expectedStatusCode": 200,
+      "expectedResponseCode": 200,
+      "payload": {
+        "search_product": "top"
+      }
+    },
+    "verifyLogin": {
+      "url": "/api/verifyLogin",
+      "method": "POST",
+      "expectedStatusCode": 200,
+      "expectedResponseCode": 200,
+      "payload": {
+        "email": "testuser@example.com",
+        "password": "TestPassword123!"
+      }
+    },
+    "createAccount": {
+      "url": "/api/createAccount",
+      "method": "POST",
+      "expectedStatusCode": 200,
+      "expectedResponseCode": 200,
+      "payload": {
+        "name": "Test User",
+        "email": "testapi@example.com",
+        "password": "TestPassword123!",
+        "title": "Mr",
+        "birth_date": "15",
+        "birth_month": "1",
+        "birth_year": "1990",
+        "firstname": "Test",
+        "lastname": "User",
+        "company": "Test Company",
+        "address1": "123 Test St",
+        "address2": "Apt 1",
+        "country": "United States",
+        "zipcode": "12345",
+        "state": "CA",
+        "city": "Test City",
+        "mobile_number": "1234567890"
+      }
+    },
+    "deleteAccount": {
+      "url": "/api/deleteAccount",
+      "method": "DELETE",
+      "expectedStatusCode": 200,
+      "expectedResponseCode": 200,
+      "payload": {
+        "email": "testapi@example.com",
+        "password": "TestPassword123!"
+      }
+    }
+  },
+  "errorScenarios": [
+    {
+      "name": "Invalid endpoint",
+      "url": "/api/invalidendpoint",
+      "method": "GET",
+      "expectedStatusCode": 404
+    },
+    {
+      "name": "Missing search parameter",
+      "url": "/api/searchProduct",
+      "method": "POST",
+      "expectedStatusCode": 200,
+      "expectedResponseCode": 400,
+      "payload": {}
+    },
+    {
+      "name": "Invalid login credentials",
+      "url": "/api/verifyLogin",
+      "method": "POST",
+      "expectedStatusCode": 200,
+      "expectedResponseCode": 404,
+      "payload": {
+        "email": "invalid@example.com",
+        "password": "wrongpassword"
+      }
+    }
+  ],
+  "responseSchemas": {
+    "productsList": {
+      "type": "object",
+      "properties": {
+        "responseCode": { "type": "number" },
+        "products": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "number" },
+              "name": { "type": "string" },
+              "price": { "type": "string" },
+              "brand": { "type": "string" },
+              "category": {
+                "type": "object",
+                "properties": {
+                  "usertype": {
+                    "type": "object",
+                    "properties": {
+                      "usertype": { "type": "string" }
+                    }
+                  },
+                  "category": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "brandsList": {
+      "type": "object",
+      "properties": {
+        "responseCode": { "type": "number" },
+        "brands": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "number" },
+              "brand": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "testData": {
+    "validSearchTerms": ["top", "dress", "jeans", "shirt"],
+    "invalidSearchTerms": ["", "xyz123", "!@#$%"],
+    "validEmailFormats": [
+      "test@example.com",
+      "user.name@domain.co.uk",
+      "firstname+lastname@company.org"
+    ],
+    "invalidEmailFormats": [
+      "invalid-email",
+      "@example.com",
+      "test@",
+      "test.example.com"
+    ]
+  }
+}
