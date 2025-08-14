@@ -22,7 +22,6 @@ A comprehensive Cypress test automation framework for e-commerce applications, d
 
 ![Cypress](https://img.shields.io/badge/Cypress-14.x-brightgreen?logo=cypress)
 ![Node.js](https://img.shields.io/badge/Node.js-22.x-brightgreen?logo=node.js)
-![CI](https://github.com/yogender15/demoCypress/actions/workflows/ci.yml/badge.svg)
 
 A robust, production-ready Cypress automation framework for e-commerce applications, focused on UI and API testing best practices.
 
@@ -159,11 +158,11 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 
 - 📖 [Cypress Documentation](https://docs.cypress.io/)
 - 💬 [GitHub Issues](https://github.com/yogender15/demoCypress/issues)
-- 📧 Email: qa-automation@company.com
+- 📧 Email: yogendermp15@outlook.com
 
 ---
 
-**Built with ❤️ by the QA Automation Team**
+**Built with ❤️ by Yogender Mummidi Prakash**
 - Prefer custom commands for common actions
 - Use `data-qa` attributes for selectors
 - Keep tests atomic and independent
@@ -182,4 +181,4 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-**Built with ❤️ by the QA Automation Team**
+**Built with ❤️ by Yogender Mummidi Prakash**
